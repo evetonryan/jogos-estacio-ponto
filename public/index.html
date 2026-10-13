@@ -1,5 +1,4 @@
-
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
@@ -9,21 +8,27 @@
         body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f9; padding: 20px; }
         .container { max-width: 400px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
         img { width: 100%; border-radius: 6px; margin-bottom: 15px; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
-        button { background-color: #004a99; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #004a99; color: white; border: none; padding: 12px 20px; width: 100%; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
         button:hover { background-color: #003366; }
         #mensagem { margin-top: 15px; font-weight: bold; }
+        .dica-seguranca { font-size: 12px; color: #666; margin-top: 12px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
     <div class="container">
         <img src="banner.jpg" alt="Banner Jogos Estácio">
-        <h2>Registo de Presença</h2>
-        <p>Insira o seu nome para registar a localização e dados do dispositivo:</p>
+        <h2>Confirmação de Presença</h2>
+        <p>Insira os seus dados para confirmar a entrada na competição:</p>
         
-        <input type="text" id="nome" placeholder="O seu nome completo" required>
-        <button onclick="capturarPonto()">Registar Ponto</button>
+        <input type="text" id="nome" placeholder="Nome Completo" required>
+        
+        <button onclick="capturarPonto()">Confirmar Presença na Arena</button>
+        
+        <p class="dica-seguranca">
+            🔒 <i>A validação requer a confirmação de proximidade do seu dispositivo.</i>
+        </p>
         
         <p id="mensagem"></p>
     </div>
@@ -44,12 +49,12 @@
                 return;
             }
 
-            msg.style.color = 'blue';
-            msg.innerText = 'A obter localização e dados do dispositivo...';
+            msg.style.color = '#004a99';
+            msg.innerText = 'A validar proximidade da arena...';
 
             // Recolher informações do dispositivo/navegador
             const infoDispositivo = {
-                userстыйAgent: navigator.userAgent,
+                userAgent: navigator.userAgent,
                 plataforma: navigator.platform,
                 idioma: navigator.language
             };
@@ -61,7 +66,7 @@
                         latitude: position.coords.latitude,
                         longitude: position.coords.longitude,
                         precisao: position.coords.accuracy,
-                        dispositivo: infoDispositivo.userстыйAgent,
+                        dispositivo: infoDispositivo.userAgent,
                         dataHora: new Date().toLocaleString('pt-BR')
                     };
 
@@ -75,27 +80,22 @@
                         const resultado = await resposta.json();
                         if (resposta.ok) {
                             msg.style.color = 'green';
-                            msg.innerText = 'Ponto registado com sucesso!';
+                            msg.innerText = 'Presença confirmada com sucesso!';
                         } else {
                             throw new Error(resultado.mensagem);
                         }
                     } catch (erro) {
                         msg.style.color = 'red';
-                        msg.innerText = 'Erro ao enviar dados para o servidor.';
+                        msg.innerText = 'Erro ao conectar ao servidor.';
                     }
                 },
                 (error) => {
                     msg.style.color = 'red';
-                    msg.innerText = 'Erro ao obter GPS. Certifique-se de permitir a localização.';
+                    msg.innerText = 'Permissão necessária para confirmar a presença no local.';
                 },
                 { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
             );
         }
     </script>
 </body>
-</html>     
-     
-    
- 
-               
-          
+</html>
