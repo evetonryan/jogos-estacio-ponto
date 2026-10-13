@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema de Ponto para Jogos Estácio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .card {
+            max-width: 500px;
+            margin: 30px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .banner {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .content {
+            padding: 25px;
+        }
+        h2 {
+            color: #1a252f;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #219653;
+        }
+        #status {
+            margin-top: 15px;
+            color: #555;
+            font-size: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <img src="banner.jpg" alt="Jogos Estácio" class="banner">
+        
+        <div class="content">
+            <h2>Registo de Ponto - Jogos Estácio</h2>
+            
+            <div id="form-container">
+                <div class="form-group">
+                    <label for="nome">Digite o seu Nome:</label>
+                    <input type="text" id="nome" placeholder="Ex: João Silva" required>
+                </div>
+                <button onclick="registarPonto()">Registar Presença / Ponto</button>
+            </div>
+
+            <p id="status"></p>
+        </div>
+    </div>
+
+    <script>
+        function registarPonto() {
+            const nomeInput = document.getElementById('nome').value.trim();
+            const statusText = document.getElementById('status');
+
+            if (!nomeInput) {
+                alert("Por favor, digite o seu nome antes de registar o ponto!");
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                statusText.innerText = "Geolocalização não suportada pelo navegador.";
+                return;
+            }
+
+            statusText.innerText = "A obter localização GPS...";
+
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const dados = {
+                    usuario_id: nomeInput, // Aqui vai o nome digitado pela pessoa
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    precisao: position.coords.accuracy
+                };
+                
+                statusText.innerText = "A enviar dados para o servidor...";
+
+                fetch('/api/salvar-localizacao', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dados)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    statusText.style.color = "#27ae60";
+                    statusText.innerText = "Ponto de " + nomeInput + " registado com sucesso!";
+                    document.getElementById('form-container').style.display = 'none'; // Esconde o formulário após sucesso
+                })
+                .catch(err => {
+                    statusText.style.color = "red";
+                    statusText.innerText = "Erro ao enviar dados ao servidor.";
+                });
+
+            }, function(error) {
+                statusText.style.color = "red";
+                statusText.innerText = "Erro ao obter localização: " + error.message;
+            }, {
+                enableHighAccuracy: true
+            });
+        }
+    </script>
+</body>
+</html>
